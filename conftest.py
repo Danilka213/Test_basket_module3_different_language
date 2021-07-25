@@ -1,5 +1,6 @@
 import pytest
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 def pytest_addoption(parser):
     parser.addoption('--language', action='store', default=None,
@@ -7,27 +8,12 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope="function")
-def browser():
+def browser(request):
+    language = request.config.getoption("language")
     print("\nstart browser for test..")
-    browser = webdriver.Chrome()
+    options = Options()
+    options.add_experimental_option('prefs', {'intl.accept_languages': language})
+    browser = webdriver.Chrome(options=options)
     yield browser
     print("\nquit browser..")
     browser.quit()
-    
-@pytest.fixture   
-def choose_language(language_country):
-        if language_country == "ru":
-            return "ru"
-        elif language_country == "en":
-            return "en"
-        elif language_country == "fr":
-            return "fr"
-        elif language_country ==  "es":
-            return "es" 
-        elif language_country ==  "it":
-            return "it"
-        assert 0  # чтобы увидеть вывод
-    
-@pytest.fixture
-def language_country(request):
-    return request.config.getoption("--language")
